@@ -1,3 +1,6 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+
 import os
 import tkinter as tk
 import webbrowser
@@ -40,7 +43,8 @@ def resource_path(relative_path):
         return os.path.join(base_path, relative_path)
     except FileNotFoundError:
         return None
-    
+
+# GUID获取(从网站上)
 def guid():
     url = 'https://www.guidgen.com/'
     html = etree.HTML(get(url).text)
@@ -48,6 +52,7 @@ def guid():
     id = id[:8] + id[9:13] + id[14:18] + id[19:23] + id[24:]
     return id
 
+# 主UI
 def main():
 
     #init UI
@@ -86,7 +91,7 @@ def main():
     
     def open_method():
         webbrowser.open(resource_path('method.html'))
-
+    
     def create():
         mp3 = []
         try:
@@ -114,7 +119,7 @@ def main():
 
         win32api.MessageBox(None, '生成成功！', '成功', MB_OK)
     
-    #main UI
+    #组件放置
     name = tk.Button(window, text='本程序由wjieTD制作,无毒放心食用', bd=0, activeforeground='#00BFFF', command=my_bilibili)
     t_m = tk.Label(window, text='请输入mp3文件的路径:')
     music = tk.Entry(window, exportselection=0, width=35, textvariable=music_path, state=tk.DISABLED)
