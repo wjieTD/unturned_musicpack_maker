@@ -1,11 +1,10 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
-
 import os
 import tkinter as tk
 import webbrowser
 import sys
 import win32api
+import uuid
+import random
 from tkinter import filedialog
 from requests import get
 from lxml import etree
@@ -43,16 +42,12 @@ def resource_path(relative_path):
         return os.path.join(base_path, relative_path)
     except FileNotFoundError:
         return None
-
-# GUID获取(从网站上)
+    
 def guid():
-    url = 'https://www.guidgen.com/'
-    html = etree.HTML(get(url).text)
-    id = ''.join(html.xpath('//p/input/@value'))
-    id = id[:8] + id[9:13] + id[14:18] + id[19:23] + id[24:]
-    return id
+    guid = str(uuid.uuid3(uuid.NAMESPACE_DNS, str(random.randint(1,10000000000000000))))
+    guid = guid[:8] + guid[9:13] + guid[14:18] + guid[19:23] + guid[24:]
+    return guid
 
-# 主UI
 def main():
 
     #init UI
@@ -91,7 +86,7 @@ def main():
     
     def open_method():
         webbrowser.open(resource_path('method.html'))
-    
+
     def create():
         mp3 = []
         try:
@@ -119,7 +114,7 @@ def main():
 
         win32api.MessageBox(None, '生成成功！', '成功', MB_OK)
     
-    #组件放置
+    #main UI
     name = tk.Button(window, text='本程序由wjieTD制作,无毒放心食用', bd=0, activeforeground='#00BFFF', command=my_bilibili)
     t_m = tk.Label(window, text='请输入mp3文件的路径:')
     music = tk.Entry(window, exportselection=0, width=35, textvariable=music_path, state=tk.DISABLED)
@@ -131,11 +126,9 @@ def main():
     masterbundle = tk.Entry(window, exportselection=0, width=35, textvariable=masterbundle_name)
     export = tk.Button(window, text='开始生成', command=create)
     masterbundle_dat = tk.Button(window, text='一键生成MasterBundle.dat文件', command=create_dat)
-    alert = tk.Label(window, text='如果需要替换asset文件请把放置asset文件的文件夹清空\n生成过程中未响应是正常的哦')
     wrong = tk.Button(window, text='常见错误及解决方法', command=open_method)
 
     wrong.place(x=280, y=180)
-    alert.place(x=25, y=275)
     masterbundle_dat.place(x=40, y=230)
     export.place(x=100, y=200)
     t_mb.place(x=10, y=140)
