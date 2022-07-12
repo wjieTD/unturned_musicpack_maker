@@ -31,7 +31,7 @@ ASSET_STR = '''//TD Marker
         }}
     }}
     '''
-
+VERSIONS = '1.1'
 #解决单文件打包路径问题
 def resource_path(relative_path):
     try:
@@ -44,7 +44,9 @@ def resource_path(relative_path):
         return None
     
 def guid():
-    guid = str(uuid.uuid3(uuid.NAMESPACE_DNS, str(random.randint(1,10000000000000000))))
+    def r():
+        return random.randint(1,random.randint(100000,1000000000000)+random.randint(10000000,100000000000000000))
+    guid = str(uuid.uuid3(uuid.NAMESPACE_DNS, str(random.randint(1, r()+r()+r()))))
     guid = guid[:8] + guid[9:13] + guid[14:18] + guid[19:23] + guid[24:]
     return guid
 
@@ -55,7 +57,7 @@ def main():
     window.geometry('400x320+600+258')
     window.title('音乐包ASSET生成')
     window.resizable(False, False)
-    window.iconbitmap(resource_path('48x48.ico'))
+    window.iconbitmap(resource_path('48x48un.ico'))
 
     #变量
     music_path = tk.StringVar()
@@ -70,6 +72,9 @@ def main():
     #func
     def my_bilibili():
         webbrowser.open('https://space.bilibili.com/480281396')
+    
+    def open_github():
+        webbrowser.open('https://github.com/wjieTD/unturned_musicpack_maker')
 
     def give_music():
         music_path.set(filedialog.askdirectory(initialdir='.', title='选择mp3文件的位置'))
@@ -115,7 +120,7 @@ def main():
         win32api.MessageBox(None, '生成成功！', '成功', MB_OK)
     
     #main UI
-    name = tk.Button(window, text='本程序由wjieTD制作,无毒放心食用', bd=0, activeforeground='#00BFFF', command=my_bilibili)
+    name = tk.Button(window, text='By wjieTD', bd=0, activeforeground='#00BFFF', command=my_bilibili)
     t_m = tk.Label(window, text='请输入mp3文件的路径:')
     music = tk.Entry(window, exportselection=0, width=35, textvariable=music_path, state=tk.DISABLED)
     get_music = tk.Button(window, text='选择', command=give_music)
@@ -127,7 +132,9 @@ def main():
     export = tk.Button(window, text='开始生成', command=create)
     masterbundle_dat = tk.Button(window, text='一键生成MasterBundle.dat文件', command=create_dat)
     wrong = tk.Button(window, text='常见错误及解决方法', command=open_method)
+    version = tk.Button(window, text='Version:{}'.format(VERSIONS), command=open_github, bd=0)
 
+    version.place(x=330, y=0)
     wrong.place(x=280, y=180)
     masterbundle_dat.place(x=40, y=230)
     export.place(x=100, y=200)
