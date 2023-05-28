@@ -7,7 +7,6 @@ import uuid
 import random
 from tkinter import filedialog
 from requests import get
-from lxml import etree
 from win32con import MB_OK
 
 ASSET_STR = '''//TD Marker
@@ -45,9 +44,9 @@ def resource_path(relative_path):
     
 def guid():
     def r():
-        return random.randint(1,random.randint(100000,1000000000000)+random.randint(10000000,100000000000000000))
+        return random.randint(1,random.randint(100000,1000000000000)+random.randint(10000000,100000000000000000)) #数字是随便输的
     guid = str(uuid.uuid3(uuid.NAMESPACE_DNS, str(random.randint(1, r()+r()+r()))))
-    guid = guid[:8] + guid[9:13] + guid[14:18] + guid[19:23] + guid[24:]
+    guid = guid[:8] + guid[9:13] + guid[14:18] + guid[19:23] + guid[24:] #没有符号
     return guid
 
 def main():
@@ -57,13 +56,13 @@ def main():
     window.geometry('400x320+600+258')
     window.title('音乐包ASSET生成')
     window.resizable(False, False)
-    window.iconbitmap(resource_path('48x48un.ico'))
+    window.iconbitmap(resource_path('.\\48x48un.ico'))
 
     #变量
     music_path = tk.StringVar()
     asset_path = tk.StringVar()
     masterbundle_name = tk.StringVar()
-    masterbundle_name.set('music.masterbundle')
+    masterbundle_name.set('请更改')
     asset_path.set('./Assets')
     music_path.set('./music')
     t_mb_state = tk.NORMAL
@@ -83,21 +82,25 @@ def main():
         asset_path.set(filedialog.askdirectory(initialdir='.', title='选择Asset文件存放位置'))
     
     def create_dat():
+        mb_name = masterbundle_name.get() + '.masterbundle'
         try:
-            with open('{}\\MasterBundle.dat'.format(filedialog.askdirectory(initialdir='.', title='选择MasterBundle.dat文件存放位置')), mode='w', encoding='utf-8') as f:
-                f.write('//TD Marker\nAsset_Bundle_Name {}\nAsset_Prefix Assets/{}\nAsset_Bundle_Version 3'.format(masterbundle_name.get(), masterbundle_name.get()[:-13]))
+            if masterbundle_name.get() == '请更改':
+                win32api.MessageBox(None, '请更改名称！', '发生了一个错误', MB_OK)
+            else:
+                with open('{}\\MasterBundle.dat'.format(filedialog.askdirectory(initialdir='.', title='选择MasterBundle.dat文件存放位置')), mode='w', encoding='utf-8') as f:
+                    f.write('//TD Marker\nAsset_Bundle_Name {}\nAsset_Prefix Assets/{}\nAsset_Bundle_Version 3'.format(mb_name, mb_name[:-13]))
         except FileNotFoundError:
             win32api.MessageBox(None, '路径错误！', '发生了一个错误', MB_OK)
     
-    def open_method():
-        webbrowser.open(resource_path('method.html'))
 
     def create():
+        mb_name = masterbundle_name.get() + '.masterbundle'
         mp3 = []
         try:
             for name in os.listdir(music_path.get()):
                 if name[-4:] == '.mp3':
-                    mp3.append(name)
+                    mp3.append(name[:-4])
+            
         except FileNotFoundError:
             win32api.MessageBox(None, '文件夹不存在, 请重新选择路径', '发生了一个错误', MB_OK)
             return None
@@ -106,11 +109,20 @@ def main():
             return None
         for name in mp3:
             try:
-                os.mkdir('{}\\{}'.format(asset_path.get(), name[:-4]))
-                with open('{}\\{}\\{}.asset'.format(asset_path.get(), name[:-4], name[:-4]), mode='w+', encoding='utf-8') as f:
-                    f.write(ASSET_STR.format(guid(), str(masterbundle_name.get()), name))
-                with open('{}\\{}\\English.dat'.format(asset_path.get(), name[:-4]), mode='w+', encoding='utf-8') as f:
-                    f.write('Name {}'.format(name[:-4]))
+                if masterbundle_name.get() == '请更改':
+                    win32api.MessageBox(None, '请更改名称！', '发生了一个错误', MB_OK)
+                    return 0
+                else:
+                    while 1:
+                        if name[-1] == '\40':
+                            name = name[:-1]
+                        else:
+                            break
+                    os.mkdir('{}/{}'.format(asset_path.get(), name))
+                    with open('{}/{}/{}.asset'.format(asset_path.get(), name, name), mode='w+', encoding='utf-8') as f:
+                        f.write(ASSET_STR.format(guid(), str(mb_name), name+'.mp3'))
+                    with open('{}/{}/English.dat'.format(asset_path.get(), name), mode='w+', encoding='utf-8') as f:
+                        f.write('Name {}'.format(name))
             except FileNotFoundError:
                 win32api.MessageBox(None, '文件夹不存在, 请重新选择路径', '发生了一个错误', MB_OK)
                 return None
@@ -129,13 +141,14 @@ def main():
     get_asset = tk.Button(window, text='选择', command=give_asset)
     t_mb = tk.Label(window, text='请输入masterbundle名:', state=t_mb_state)
     masterbundle = tk.Entry(window, exportselection=0, width=35, textvariable=masterbundle_name)
+    mb =tk.Entry(window, width=13)
     export = tk.Button(window, text='开始生成', command=create)
     masterbundle_dat = tk.Button(window, text='一键生成MasterBundle.dat文件', command=create_dat)
-    wrong = tk.Button(window, text='常见错误及解决方法', command=open_method)
     version = tk.Button(window, text='Version:{}'.format(VERSIONS), command=open_github, bd=0)
 
     version.place(x=330, y=0)
-    wrong.place(x=280, y=180)
+    mb.insert(0, '.masterbundle')
+    mb.place(x=200, y=170)
     masterbundle_dat.place(x=40, y=230)
     export.place(x=100, y=200)
     t_mb.place(x=10, y=140)
